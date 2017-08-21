@@ -1,6 +1,4 @@
-/**
- * 
- */
+/** */
 package assertj;
 
 import static java.lang.annotation.ElementType.METHOD;
@@ -13,12 +11,9 @@ import java.lang.annotation.Target;
 
 @Documented
 @Retention(SOURCE)
-@Target({ TYPE, METHOD })
-/**
- * @author gbloemsma
- *
- */
+@Target({TYPE, METHOD})
+/** @author gbloemsma */
 public @interface AssertFor {
-    /** Class that assertions will be generated for */
-    Class<?> value();
+  /** Class that assertions will be generated for */
+  Class<?> value();
 }

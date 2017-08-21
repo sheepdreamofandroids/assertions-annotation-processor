@@ -1,17 +1,11 @@
 package test;
 
-import assertj.AnnotationProcessor;
-import assertj.ClassSourcerer;
-import assertj.FieldSourcerer;
-import assertj.Sourcerer;
 import assertj.AssertsFor;
+import assertj.Sourcerer;
 
-@AssertsFor({ Sourcerer.class, Dummy.class })
+@AssertsFor({Sourcerer.class, Dummy.class})
 public class Test {
 
-    @AssertsFor({ String.class })
-    public void someTest() {
-
-    }
-
+  @AssertsFor({String.class})
+  public void someTest() {}
 }
