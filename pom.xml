@@ -4,13 +4,14 @@
 	<groupId>org.assertj</groupId>
 	<artifactId>assertj-annotation-processor</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
 
 	<dependencies>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.assertj</groupId> -->
-<!-- 			<artifactId>assertj-assertions-generator</artifactId> -->
-<!-- 			<version>2.1.0-SNAPSHOT</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.assertj</groupId> -->
+		<!-- <artifactId>assertj-assertions-generator</artifactId> -->
+		<!-- <version>2.1.0-SNAPSHOT</version> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>com.squareup</groupId>
 			<artifactId>javapoet</artifactId>
@@ -25,15 +26,6 @@
 
 
 	<build>
-<!-- 		<sourceDirectory>src</sourceDirectory> -->
-		<resources>
-			<resource>
-				<directory>src</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-		</resources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -41,6 +33,13 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+					<annotationProcessorPaths>
+						<annotationProcessorPath>
+							<groupId>org.assertj</groupId>
+							<artifactId>assertj-annotation-processor</artifactId>
+							<version>0.0.1-SNAPSHOT</version>
+						</annotationProcessorPath>
+					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 		</plugins>
