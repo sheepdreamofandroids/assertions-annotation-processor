@@ -1,11 +1,14 @@
 package assertj;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -28,19 +31,24 @@ public class ClassSourcerer extends Sourcerer {
       final ProcessingEnvironment processingEnv) {
     super(s, roundEnvironment, processingEnv);
 
+    final TypeName asserteeTypeName =
+        typeVariables.length == 0
+            ? TypeName.get(s)
+            : ParameterizedTypeName.get((ClassName) TypeName.get(s), (TypeName[]) typeVariables);
     assertion =
         TypeSpec.classBuilder(className)
             .addModifiers(Modifier.PUBLIC)
-            .addField(TypeName.get(s), assertee, Modifier.PRIVATE)
+            .addTypeVariables(Arrays.asList(typeVariables))
+            .addField(asserteeTypeName, assertee, Modifier.PRIVATE)
             .addMethod(
                 MethodSpec.constructorBuilder()
-                    .addParameter(ParameterSpec.builder(TypeName.get(s), assertee).build())
+                    .addParameter(ParameterSpec.builder(asserteeTypeName, assertee).build())
                     .addStatement("this.$N = $N", assertee, assertee)
                     .build())
             .addMethod(
                 MethodSpec.methodBuilder("that")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addParameter(TypeName.get(s), assertee)
+                    .addParameter(asserteeTypeName, assertee)
                     .returns(className)
                     .addStatement("return new $T($N)", className, assertee)
                     .build());
@@ -59,7 +67,7 @@ public class ClassSourcerer extends Sourcerer {
               && !(executableElement.getReturnType() instanceof NoType))
             new MethodSourcerer(this, (ExecutableElement) e).generate();
         }
-      } catch (Exception ex) {
+      } catch (final Exception ex) {
         ex.printStackTrace(System.err);
         processingEnv
             .getMessager()

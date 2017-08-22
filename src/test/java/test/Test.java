@@ -1,5 +1,6 @@
 package test;
 
+import assertj.AssertSourcerer;
 import assertj.AssertsFor;
 import assertj.Sourcerer;
 
@@ -10,7 +11,8 @@ public class Test {
   public void someTest() {}
 
   public void someOtherTest() {
-    Dummy dummy = new Dummy();
+    AssertSourcerer.that(null).assertee($ -> $.hashIs(13));
+    final Dummy dummy = new Dummy();
     //      new DummyAs
   }
 }
