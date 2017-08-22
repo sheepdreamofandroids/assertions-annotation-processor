@@ -1,10 +1,12 @@
 package assertj;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
@@ -13,12 +15,7 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-
 import org.junit.gen5.api.Assertions;
-
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 
 public abstract class Sourcerer {
 
@@ -37,7 +34,9 @@ public abstract class Sourcerer {
   protected final Elements elementUtils;
 
   public Sourcerer(
-      final TypeMirror s, final RoundEnvironment roundEnvironment, final ProcessingEnvironment processingEnv) {
+      final TypeMirror s,
+      final RoundEnvironment roundEnvironment,
+      final ProcessingEnvironment processingEnv) {
     super();
     this.s = s;
     this.roundEnvironment = roundEnvironment;
@@ -78,14 +77,14 @@ public abstract class Sourcerer {
   public abstract void generate();
 
   public String typeExtension(final TypeName typeName) {
-    if (typeName == TypeName.BOOLEAN) return "Boolean";
-    else if (typeName == TypeName.BYTE) return "Byte";
-    else if (typeName == TypeName.CHAR) return "Char";
+    if (typeName == TypeName.INT) return "Int";
+    // else if (typeName == TypeName.BOOLEAN) return "Boolean";
+    // else if (typeName == TypeName.BYTE) return "Byte";
+    // else if (typeName == TypeName.CHAR) return "Char";
     else if (typeName == TypeName.DOUBLE) return "Double";
-    else if (typeName == TypeName.FLOAT) return "Float";
-    else if (typeName == TypeName.INT) return "Int";
+    // else if (typeName == TypeName.FLOAT) return "Float";
     else if (typeName == TypeName.LONG) return "Long";
-    else if (typeName == TypeName.SHORT) return "Short";
+    // else if (typeName == TypeName.SHORT) return "Short";
     else return "";
   }
 }

@@ -1,12 +1,7 @@
 package assertj;
 
-import java.util.function.Predicate;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.Name;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
@@ -14,6 +9,14 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec.Builder;
+import com.squareup.javapoet.TypeVariableName;
+import com.squareup.javapoet.WildcardTypeName;
+import java.util.function.Predicate;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.Name;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 public abstract class MemberSourcerer extends Sourcerer {
   // private final Element e;
@@ -33,10 +36,19 @@ public abstract class MemberSourcerer extends Sourcerer {
     asType = typeMirror;
     type = TypeName.get(asType);
     boxed = type.box();
-    rawBoxed =
-        boxed instanceof ParameterizedTypeName ? ((ParameterizedTypeName) boxed).rawType : boxed;
+    rawBoxed = raw(boxed);
     typExtension = typeExtension(type);
     simpleName = e.getSimpleName();
+  }
+
+  public TypeName raw(TypeName type) {
+    return type instanceof ParameterizedTypeName
+        ? ((ParameterizedTypeName) type).rawType
+        : type instanceof ArrayTypeName
+            ? raw(((ArrayTypeName) type).componentType)
+            : type instanceof WildcardTypeName
+                ? null
+                : type instanceof TypeVariableName ? null : type;
   }
 
   @Override
@@ -96,5 +108,25 @@ public abstract class MemberSourcerer extends Sourcerer {
     }
   }
 
-  protected abstract MethodSpec getter();
+  public MethodSpec getter() {
+    com.squareup.javapoet.MethodSpec.Builder methodB =
+        MethodSpec.methodBuilder(simpleName.toString()).addModifiers(Modifier.PUBLIC);
+    if (rawBoxed != null)
+      methodB =
+          methodB.addAnnotation(
+              AnnotationSpec.builder(AssertFor.class)
+                  .addMember("value", "$T.class", rawBoxed)
+                  .build());
+    return methodB
+        .returns(type)
+        .addCode(
+            retrieve(CodeBlock.builder().beginControlFlow("try"))
+                .addStatement("throw new RuntimeException(e)")
+                .endControlFlow()
+                .build())
+        .build();
+  }
+
+  protected abstract com.squareup.javapoet.CodeBlock.Builder retrieve(
+      com.squareup.javapoet.CodeBlock.Builder code);
 }

@@ -1,10 +1,7 @@
 package assertj;
 
+import com.squareup.javapoet.CodeBlock.Builder;
 import javax.lang.model.element.VariableElement;
-
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.MethodSpec;
 
 public class FieldSourcerer extends MemberSourcerer {
 
@@ -13,34 +10,17 @@ public class FieldSourcerer extends MemberSourcerer {
   }
 
   @Override
-public MethodSpec getter() {
-    final MethodSpec getter =
-        MethodSpec.methodBuilder(simpleName.toString())
-            .addAnnotation(
-                AnnotationSpec.builder(AssertFor.class)
-                    .addMember("value", "$T.class", rawBoxed)
-                    .build())
-            .returns(type)
-            .addCode(
-                CodeBlock.builder()
-                    .beginControlFlow("try")
-                    .addStatement(
-                        "$T field = this.getClass().getDeclaredField($S)",
-                        fieldClassName,
-                        simpleName)
-                    .addStatement("field.setAccessible(true)")
-                    .addStatement("return ($T) field.get$N($N)", type, typExtension, assertee)
-                    .nextControlFlow(
-                        "catch ($T | $T | $T | $T e)",
-                        NoSuchFieldException.class,
-                        SecurityException.class,
-                        IllegalArgumentException.class,
-                        IllegalAccessException.class)
-                    .addStatement("throw new RuntimeException(e)")
-                    .endControlFlow()
-                    .build())
-            .build();
-    return getter;
+  protected Builder retrieve(Builder code) {
+    return code.addStatement(
+            "$T field = this.getClass().getDeclaredField($S)", fieldClassName, simpleName)
+        .addStatement("field.setAccessible(true)")
+        .addStatement("return ($T) field.get$N($N)", type, typExtension, assertee)
+        .nextControlFlow(
+            "catch ($T | $T | $T | $T e)",
+            NoSuchFieldException.class,
+            SecurityException.class,
+            IllegalArgumentException.class,
+            IllegalAccessException.class);
   }
 
   // public Object getO() {

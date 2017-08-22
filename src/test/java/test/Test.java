@@ -8,9 +8,9 @@ public class Test {
 
   @AssertsFor({String.class})
   public void someTest() {}
-  
+
   public void someOtherTest() {
-      Dummy dummy = new Dummy();
-//      new DummyAs
+    Dummy dummy = new Dummy();
+    //      new DummyAs
   }
 }

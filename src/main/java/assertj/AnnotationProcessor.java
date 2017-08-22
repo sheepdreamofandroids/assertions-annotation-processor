@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
@@ -23,7 +22,8 @@ import javax.tools.Diagnostic;
 public class AnnotationProcessor extends AbstractProcessor {
 
   @Override
-  public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
+  public boolean process(
+      final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
     final List<String> neededClasses = new ArrayList<>();
     final Set<TypeMirror> toGenerate =
         Stream.concat(
@@ -151,7 +151,8 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
   }
 
-  void generateAssertionsFor(final TypeMirror s, final RoundEnvironment roundEnvironment) throws IOException {
+  void generateAssertionsFor(final TypeMirror s, final RoundEnvironment roundEnvironment)
+      throws IOException {
     // TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(s);
     // Writer writer = processingEnv.getFiler().createSourceFile(c).openWriter();
     if (s.getKind() == TypeKind.DECLARED)
