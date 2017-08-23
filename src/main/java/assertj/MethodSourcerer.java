@@ -7,8 +7,9 @@ import javax.lang.model.element.ExecutableElement;
 
 public class MethodSourcerer extends MemberSourcerer {
 
-  public MethodSourcerer(final ClassSourcerer classSourcerer, final ExecutableElement e) {
-    super(classSourcerer, e, e.getReturnType());
+  public MethodSourcerer(
+      final ClassSourcerer classSourcerer, final ExecutableElement e, String name) {
+    super(classSourcerer, e, e.getReturnType(), name);
   }
 
   public Object getO() {

@@ -9,7 +9,9 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.processing.FilerException;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -47,6 +49,7 @@ public class ClassSourcerer extends Sourcerer {
                     .build())
             .addMethod(
                 MethodSpec.methodBuilder("that")
+                    .addTypeVariables(Arrays.asList(typeVariables))
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addParameter(asserteeTypeName, assertee)
                     .returns(className)
@@ -57,15 +60,19 @@ public class ClassSourcerer extends Sourcerer {
   @Override
   public void generate() {
     final List<? extends Element> enclosedElements = element.getEnclosedElements();
+    Set<String> usedNames = new HashSet<>(Arrays.asList("toString", "hashCode", "getClass"));
     for (final Element e : enclosedElements)
       try {
+        String name = e.getSimpleName().toString();
+        while (usedNames.contains(name)) name = name + "_";
+        usedNames.add(name);
         if (e.getKind() == ElementKind.FIELD && !e.getModifiers().contains(Modifier.STATIC))
-          new FieldSourcerer(this, (VariableElement) e).generate();
+          new FieldSourcerer(this, (VariableElement) e, name).generate();
         if (e.getKind() == ElementKind.METHOD && !e.getModifiers().contains(Modifier.STATIC)) {
           final ExecutableElement executableElement = (ExecutableElement) e;
           if (executableElement.getParameters().size() == 0
               && !(executableElement.getReturnType() instanceof NoType))
-            new MethodSourcerer(this, (ExecutableElement) e).generate();
+            new MethodSourcerer(this, (ExecutableElement) e, name).generate();
         }
       } catch (final Exception ex) {
         ex.printStackTrace(System.err);

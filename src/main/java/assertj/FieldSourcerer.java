@@ -5,8 +5,8 @@ import javax.lang.model.element.VariableElement;
 
 public class FieldSourcerer extends MemberSourcerer {
 
-  FieldSourcerer(final ClassSourcerer from, final VariableElement e) {
-    super(from, e, e.asType());
+  FieldSourcerer(final ClassSourcerer from, final VariableElement e, String name) {
+    super(from, e, e.asType(), name);
   }
 
   @Override

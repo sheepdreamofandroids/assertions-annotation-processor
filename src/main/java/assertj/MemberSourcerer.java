@@ -8,16 +8,20 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec.Builder;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.Name;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
 public abstract class MemberSourcerer extends Sourcerer {
+  private static final HashSet OBJECT_GETTERS =
+      new HashSet(Arrays.asList("hashCode", "toString", "getClass"));
   // private final Element e;
   private final Builder assertion;
   private final TypeMirror asType;
@@ -25,21 +29,32 @@ public abstract class MemberSourcerer extends Sourcerer {
   private final TypeName boxed;
   protected TypeName rawBoxed;
   protected String typExtension;
-  protected Name simpleName;
+  protected String simpleName;
 
-  MemberSourcerer(final ClassSourcerer from, final Element e, final TypeMirror typeMirror) {
+  MemberSourcerer(
+      final ClassSourcerer from, final Element e, final TypeMirror typeMirror, String name) {
     super(from);
     this.assertion = from.assertion;
     // this.e = e;
-    if (typeMirror instanceof DeclaredType)
-      if (((DeclaredType) typeMirror).asElement().getModifiers().contains(Modifier.PRIVATE))
+
+    if (typeMirror instanceof DeclaredType) {
+      DeclaredType declaredType = (DeclaredType) typeMirror;
+      if (declaredType.asElement().getModifiers().contains(Modifier.PRIVATE))
         throw new IllegalArgumentException(e + " of type " + typeMirror + " is private");
+      List<? extends TypeMirror> actualTypeArguments = declaredType.getTypeArguments();
+      for (TypeMirror type : actualTypeArguments) {
+        if (type instanceof DeclaredType)
+          if (((DeclaredType) type).asElement().getModifiers().contains(Modifier.PRIVATE))
+            throw new IllegalArgumentException(e + " of type " + type + " is private");
+      }
+    }
+
     asType = typeMirror;
     type = TypeName.get(asType);
     boxed = type.box();
     rawBoxed = raw(boxed);
     typExtension = typeExtension(type);
-    simpleName = e.getSimpleName();
+    simpleName = name;
   }
 
   @Override
@@ -103,8 +118,10 @@ public abstract class MemberSourcerer extends Sourcerer {
   }
 
   public MethodSpec getter() {
+    String name = simpleName.toString();
+    if (OBJECT_GETTERS.contains(name)) name = name + "_";
     com.squareup.javapoet.MethodSpec.Builder methodB =
-        MethodSpec.methodBuilder(simpleName.toString()).addModifiers(Modifier.PUBLIC);
+        MethodSpec.methodBuilder(name).addModifiers(Modifier.PUBLIC);
     if (rawBoxed != null)
       methodB =
           methodB.addAnnotation(
